@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Ahorcado</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }
+        h1 { color: #333; }
+        .game-box { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); display: inline-block; }
+        .hangman-container { text-align: center; margin-top: 20px; }
+        .hangman-figure { font-size: 32px; }
+        .hangman-word { font-size: 24px; letter-spacing: 5px; margin-top: 20px; }
+        button { padding: 10px; font-size: 16px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        button:hover { background-color: #218838; }
+        input { padding: 10px; font-size: 16px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Ahorcado</h1>
+    <p>Adivina la palabra antes de que se acaben los intentos.</p>
+    <div class="game-box">
+        <div class="hangman-container">
+            <p class="hangman-figure" id="hangmanFigure">😃</p>
+            <p class="hangman-word" id="hangmanWord">_ _ _ _ _ _</p>
+            <p id="hintMessage"></p> <!-- Para mostrar la pista -->
+        </div>
+        <input type="text" id="letterInput" maxlength="1" placeholder="Ingresa una letra" disabled>
+        <button onclick="checkLetter()" id="guessButton" disabled>Adivinar</button>
+        <p id="hangmanMessage"></p>
+        <button onclick="resetHangman()">Reiniciar</button>
+    </div>
+
+    <script>
+        // Lista de palabras y pistas
+        const wordsAndHints = [
+            { word: "ENERGIA", hint: "Es la capacidad de realizar trabajo." },
+            { word: "MATERIA", hint: "Todo lo que tiene masa y ocupa espacio." },
+            { word: "ATOMO", hint: "La unidad básica de un elemento químico." },
+            { word: "FISICA", hint: "La ciencia que estudia la materia y la energía." },
+            { word: "CALOR", hint: "Forma de energía que se transfiere entre cuerpos." }
+        ];
+
+        // Seleccionar aleatoriamente una palabra y su pista
+        const randomIndex = Math.floor(Math.random() * wordsAndHints.length);
+        const selectedWord = wordsAndHints[randomIndex].word;
+        const selectedHint = wordsAndHints[randomIndex].hint;
+
+        let guessedWord = Array(selectedWord.length).fill("_");
+        let attemptsLeft = 6;
+        const hangmanStages = ["💀", "😵", "😨", "😰", "😟", "😐", "😃"];
+        const letterInput = document.getElementById("letterInput");
+        const guessButton = document.getElementById("guessButton");
+        
+        document.getElementById("hintMessage").textContent = "Pista: " + selectedHint; // Mostrar la pista
+
+        function checkLetter() {
+            let letter = letterInput.value.toUpperCase();
+            if (!letter || attemptsLeft <= 0) return;
+            
+            if (selectedWord.includes(letter)) {
+                for (let i = 0; i < selectedWord.length; i++) {
+                    if (selectedWord[i] === letter) {
+                        guessedWord[i] = letter;
+                    }
+                }
+                document.getElementById("hangmanWord").textContent = guessedWord.join(" ");
+                
+                if (!guessedWord.includes("_")) {
+                    document.getElementById("hangmanMessage").textContent = "¡Felicidades! Has adivinado la palabra.";
+                    disableGame();
+                }
+            } else {
+                attemptsLeft--;
+                document.getElementById("hangmanFigure").textContent = hangmanStages[attemptsLeft];
+            }
+            
+            if (attemptsLeft === 0) {
+                document.getElementById("hangmanMessage").textContent = "Has perdido. La palabra era: " + selectedWord;
+                disableGame();
+            }
+            
+            letterInput.value = "";
+        }
+        
+        function resetHangman() {
+            guessedWord = Array(selectedWord.length).fill("_");
+            attemptsLeft = 6;
+            document.getElementById("hangmanWord").textContent = guessedWord.join(" ");
+            document.getElementById("hangmanFigure").textContent = "😃";
+            document.getElementById("hangmanMessage").textContent = "";
+            enableGame();
+        }
+        
+        function disableGame() {
+            letterInput.disabled = true;
+            guessButton.disabled = true;
+        }
+        
+        function enableGame() {
+            letterInput.disabled = false;
+            guessButton.disabled = false;
+        }
+
+        enableGame();
+    </script>
+</body>
+</html>
